@@ -1,0 +1,201 @@
+#cloud-config
+# =============================================================================
+# Cloud-Init Configuration - Installation et configuration de Nginx
+# =============================================================================
+
+# Configuration du hostname
+hostname: ${hostname}
+manage_etc_hosts: true
+
+# Mise à jour des paquets au premier boot
+package_update: true
+package_upgrade: true
+
+# Installation des paquets
+packages:
+  - nginx
+  - curl
+  - vim
+  - htop
+  - net-tools
+  - ufw
+
+# Création des fichiers
+write_files:
+  # Page d'accueil personnalisée
+  - path: ${nginx_root}/index.html
+    permissions: '0644'
+    owner: www-data:www-data
+    content: |
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Nginx - ${hostname}</title>
+          <style>
+              * {
+                  margin: 0;
+                  padding: 0;
+                  box-sizing: border-box;
+              }
+              body {
+                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  min-height: 100vh;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  padding: 20px;
+              }
+              .container {
+                  background: white;
+                  border-radius: 20px;
+                  padding: 40px;
+                  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                  max-width: 600px;
+                  width: 100%;
+                  text-align: center;
+              }
+              h1 {
+                  color: #333;
+                  margin-bottom: 20px;
+                  font-size: 2em;
+              }
+              .welcome-message {
+                  color: #666;
+                  font-size: 1.2em;
+                  margin-bottom: 30px;
+                  line-height: 1.6;
+              }
+              .info-box {
+                  background: #f8f9fa;
+                  border-radius: 10px;
+                  padding: 20px;
+                  margin: 20px 0;
+              }
+              .info-item {
+                  display: flex;
+                  justify-content: space-between;
+                  padding: 10px 0;
+                  border-bottom: 1px solid #eee;
+              }
+              .info-item:last-child {
+                  border-bottom: none;
+              }
+              .info-label {
+                  font-weight: bold;
+                  color: #555;
+              }
+              .info-value {
+                  color: #667eea;
+                  font-family: monospace;
+              }
+              .badge {
+                  display: inline-block;
+                  padding: 5px 15px;
+                  border-radius: 20px;
+                  font-size: 0.9em;
+                  font-weight: bold;
+                  text-transform: uppercase;
+              }
+              .badge-env {
+                  background: #28a745;
+                  color: white;
+              }
+              .footer {
+                  margin-top: 30px;
+                  color: #999;
+                  font-size: 0.9em;
+              }
+              .nginx-logo {
+                  font-size: 3em;
+                  margin-bottom: 20px;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <div class="nginx-logo">🚀</div>
+              <h1>Serveur Nginx Opérationnel!</h1>
+              <p class="welcome-message">${welcome_message}</p>
+              
+              <div class="info-box">
+                  <div class="info-item">
+                      <span class="info-label">Hostname:</span>
+                      <span class="info-value">${hostname}</span>
+                  </div>
+                  <div class="info-item">
+                      <span class="info-label">Environnement:</span>
+                      <span class="badge badge-env">${environment}</span>
+                  </div>
+                  <div class="info-item">
+                      <span class="info-label">OS:</span>
+                      <span class="info-value">Ubuntu 22.04 LTS</span>
+                  </div>
+                  <div class="info-item">
+                      <span class="info-label">Déployé via:</span>
+                      <span class="info-value">Terraform + OpenStack</span>
+                  </div>
+              </div>
+              
+              <div class="footer">
+                  <p>Page générée automatiquement par cloud-init</p>
+              </div>
+          </div>
+      </body>
+      </html>
+
+  # Configuration Nginx optimisée
+  - path: /etc/nginx/conf.d/security.conf
+    permissions: '0644'
+    owner: root:root
+    content: |
+      # Security headers
+      add_header X-Frame-Options "SAMEORIGIN" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      
+      # Hide Nginx version
+      server_tokens off;
+
+  # Script de health check
+  - path: /usr/local/bin/health-check.sh
+    permissions: '0755'
+    owner: root:root
+    content: |
+      #!/bin/bash
+      # Health check script
+      if curl -s -o /dev/null -w "%%{http_code}" http://localhost | grep -q "200"; then
+          echo "OK - Nginx is healthy"
+          exit 0
+      else
+          echo "CRITICAL - Nginx is not responding"
+          exit 2
+      fi
+
+# Commandes à exécuter
+runcmd:
+  # Configuration du firewall
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 443/tcp
+  - ufw --force enable
+  
+  # Activation et démarrage de Nginx
+  - systemctl enable nginx
+  - systemctl restart nginx
+  
+  # Vérification du statut
+  - systemctl status nginx
+  
+  # Log de fin d'installation
+  - echo "Cloud-init completed at $(date)" >> /var/log/cloud-init-complete.log
+
+# Message final
+final_message: |
+  Cloud-init terminé après $UPTIME secondes.
+  Serveur: ${hostname}
+  Environnement: ${environment}
+  Nginx est prêt!

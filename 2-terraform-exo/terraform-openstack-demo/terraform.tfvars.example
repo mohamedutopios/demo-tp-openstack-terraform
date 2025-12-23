@@ -1,0 +1,88 @@
+# =============================================================================
+# Terraform Variables - Fichier de configuration
+# =============================================================================
+# Copiez ce fichier vers terraform.tfvars et modifiez les valeurs
+# NE JAMAIS COMMITER ce fichier avec des credentials réels!
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Configuration OpenStack
+# -----------------------------------------------------------------------------
+
+# URL de l'API Keystone (exemple: https://cloud.example.com:5000/v3)
+openstack_auth_url = "https://your-openstack-cloud.com:5000/v3"
+
+# Région OpenStack
+openstack_region = "RegionOne"
+
+# Nom du projet/tenant
+openstack_tenant_name = "mon-projet"
+
+# Identifiants (préférez les variables d'environnement OS_* en production)
+openstack_user_name = "mon-utilisateur"
+openstack_password  = "mon-mot-de-passe-secret"
+
+# -----------------------------------------------------------------------------
+# Configuration Instance
+# -----------------------------------------------------------------------------
+
+# Nom de l'instance
+instance_name = "nginx-webserver"
+
+# Flavor (taille de la VM) - adaptez selon votre cloud
+instance_flavor = "m1.small"
+
+# Image Ubuntu 22.04 - vérifiez le nom exact dans votre cloud
+instance_image = "Ubuntu 22.04"
+
+# Taille du volume root en GB
+instance_volume_size = 20
+
+# -----------------------------------------------------------------------------
+# Configuration Réseau
+# -----------------------------------------------------------------------------
+
+# Nom du réseau public externe (pour les floating IPs)
+public_network_name = "public1"
+
+# CIDR du réseau privé
+private_network_cidr = "192.168.100.0/24"
+
+# Serveurs DNS
+dns_nameservers = ["8.8.8.8", "8.8.4.4"]
+
+# -----------------------------------------------------------------------------
+# Configuration Sécurité
+# -----------------------------------------------------------------------------
+
+# Clé publique SSH (contenu du fichier ~/.ssh/id_rsa.pub)
+ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ... user@hostname"
+
+# CIDR autorisé pour SSH (0.0.0.0/0 = tout le monde, à restreindre en prod!)
+allowed_ssh_cidr = "0.0.0.0/0"
+
+# CIDR autorisé pour HTTP/HTTPS
+allowed_http_cidr = "0.0.0.0/0"
+
+# -----------------------------------------------------------------------------
+# Configuration Application
+# -----------------------------------------------------------------------------
+
+# Environnement de déploiement (dev, staging, prod)
+environment = "dev"
+
+# Nom du projet
+project_name = "demo"
+
+# Message de bienvenue personnalisé sur la page Nginx
+nginx_welcome_message = "Bienvenue sur le serveur Nginx déployé avec Terraform sur OpenStack!"
+
+# -----------------------------------------------------------------------------
+# Tags additionnels
+# -----------------------------------------------------------------------------
+
+additional_tags = {
+  Owner       = "devops-team"
+  CostCenter  = "IT-123"
+  Application = "web-frontend"
+}
